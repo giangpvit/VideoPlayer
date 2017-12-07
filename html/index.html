@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>videojs-playlist Demo</title>
+  <link href="node_modules/video.js/dist/video-js.css" rel="stylesheet">
+  <link href="node_modules/videojs-playlist-thumbs/dist/videojs-playlist.css" rel="stylesheet">
+</head>
+<body>
+    <video id="videojs-playlist-player" class="video-js vjs-default-skin" controls preload="auto">
+    </video>
+  <script src="node_modules/video.js/dist/video.js"></script>
+  <script src="node_modules/videojs-playlist-thumbs/dist/videojs-playlist.js"></script>
+  <script src="/libs/qimessaging/1.0/qimessaging.js"></script>
+  <script src="/lib/jquery/jquery.min.js"></script>
+  <script>
+    var player = videojs('videojs-playlist-player', { preload: true, techOrder: ["youtube", "html5"], controls: true});
+    var videosList = [
+      {
+        //"src" : "https://media.w3.org/2010/05/sintel/trailer.mp4",
+        "src" : "http://198.18.0.1/apps/zoetisvideos/video/0330.mp4",
+        "type": "video/mp4",
+        "title": "0330",
+        "thumbnail": "images/zoetis.png"
+      },
+      {
+        "src" : "http://198.18.0.1/apps/zoetisvideos/video/0426.mp4",
+        "type": "video/mp4",
+        "title": "0426",
+        "thumbnail": "images/zoetis.png"
+      },
+      {
+        "src" : "http://198.18.0.1/apps/zoetisvideos/video/0607.mp4",
+        "type": "video/mp4",
+        "title": "0607",
+        "thumbnail": "images/zoetis.png"
+      },
+      {
+        "src" : "http://198.18.0.1/apps/zoetisvideos/video/0810.mp4",
+        "type": "video/mp4",
+        "title": "0810",
+        "thumbnail": "images/zoetis.png"
+      },
+      {
+        "src" : "http://198.18.0.1/apps/zoetisvideos/video/0905.mp4",
+        "type": "video/mp4",
+        "title": "0905",
+        "thumbnail": "images/zoetis.png"
+      },
+      {
+        "src" : "http://198.18.0.1/apps/zoetisvideos/video/1018.mp4",
+        "type": "video/mp4",
+        "title": "1018",
+        "thumbnail": "images/zoetis.png"
+      }
+    ];
+
+    var paused = true;
+
+    var video = videojs('videojs-playlist-player');
+    video.on('pause', function() {
+      this.bigPlayButton.show();
+      paused = true;
+
+      // Now the issue is that we need to hide it again if we start playing
+      // So every time we do this, we can create a one-time listener for play events.
+      video.one('play', function() {
+        this.bigPlayButton.hide();
+      });
+    });
+    video.on('play', function() {
+      paused = false;
+    });
+
+    player.playlist({ videos: videosList, playlist: { hideSidebar: false, upNext: true, hideIcons: false, thumbnailSize: 250, items: 4 } });
+    var session = new QiSession();
+    $( document ).ready(function() {
+      $("body").on('click touchstart', function(e) {
+        var xPos = e.originalEvent.touches[0].pageX;
+        var yPos = e.originalEvent.touches[0].pageY;
+        if (yPos < 550) {
+          if (paused == true) {
+            video.play();
+          } else {
+            video.pause();
+          }
+        }
+        session.service("ALMemory").done(function (ALMemory) {
+          var height = $(window).height();   // returns height of browser viewport
+          var width = $(window).width();   // returns height of browser viewport
+          var str = "Size" + height + "," + width;
+          ALMemory.raiseEvent("Tapper/View/PlayVideo/Click/Next", yPos);
+
+        });
+      });
+    });
+  </script>
+</body>
+</html>
